@@ -1,0 +1,16 @@
+.signature-grid,
+.saved-signature-preview {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.signature-item img {
+    width: 100px;
+    height: auto;
+}
+
+.saved-signature-preview img {
+    width: auto;
+    max-width: 100%;
+}

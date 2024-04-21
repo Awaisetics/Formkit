@@ -1,0 +1,19 @@
+.uploaded-files p {
+    font-weight: bold;
+}
+
+.uploaded-files ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.uploaded-files li {
+    background-color: #f3f3f3;
+    border: 1px solid #ccc;
+    margin-top: 2px;
+    padding: 5px;
+}
+
+.highlight {
+    border-color: #ffcc00;
+}
