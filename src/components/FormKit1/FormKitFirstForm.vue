@@ -11,6 +11,7 @@ const radioOptions = reactive({
   z: 'Option Z'
 });
 
+const userName = ref('');
 const files = ref([]);
 const cookies = ref(null);
 const utmParams = ref(null);
@@ -39,6 +40,11 @@ async function onFormSubmit() {
   alert("Form submitted successfully!");
   console.log("Form Data:", formData);
 }
+
+const setUserName = (newName) => {
+  userName.value = newName;
+  localStorage.setItem('username', newName);
+};
 
 // Drag and drop setup
 function setupDragAndDrop() {
@@ -96,6 +102,8 @@ onMounted(() => {
         <FormKit
         type="text"
         name="name"
+        v-model="userName"
+        @input="setUserName"
         id="name"
         validation="required|not:Admin"
         label="Name"
@@ -204,11 +212,10 @@ onMounted(() => {
         name="feature"
         id="feature"
         label="Enable Feature"
-        
       />
       </div>
-      <div class="col-sm-10 form-group mb-5">
-        <custom-signature />
+      <div class="col-sm-10 form-group mb-5" v-if="userName">
+        <CustomSignature />
       </div>
        </div>
       </FormKit>
