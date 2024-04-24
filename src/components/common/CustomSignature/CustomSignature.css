@@ -14,3 +14,8 @@
     width: auto;
     max-width: 100%;
 }
+
+canvas {
+  display: block; 
+  background-color: #fff;
+}

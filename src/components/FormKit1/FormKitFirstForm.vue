@@ -1,10 +1,96 @@
+<script setup>
+import { ref, reactive, onMounted, watch  } from 'vue';
+import { useDragAndDrop } from "@formkit/drag-and-drop/vue";
+import CustomSignature from '../common/CustomSignature/CustomSignature.vue';
+import { getCookie } from '@/utils/cookieReader';
+import { getUtmParameters } from '@/utils/urlParams';
+
+const radioOptions = reactive({
+  x: 'Option X',
+  y: 'Option Y',
+  z: 'Option Z'
+});
+
+const files = ref([]);
+const cookies = ref(null);
+const utmParams = ref(null);
+const formData = reactive({});
+
+const [parent, dragAndDropFiles] = useDragAndDrop(files);
+
+watch(files, (newFiles) => {
+  dragAndDropFiles.value = newFiles;
+}, { deep: true });
+
+// Fetch cookies and UTM parameters
+function fetchCookiesAndParams() {
+  cookies.value = getCookie('session_id');
+  utmParams.value = getUtmParameters();
+  formData._meta = {
+    cookieData: cookies.value,
+    utmData: JSON.stringify(utmParams.value)
+  };
+}
+
+// Form submission handling
+async function onFormSubmit() {
+  this.$provideGlobals.setLocalStorageItem('formSubmission', true);
+  processFiles();
+  alert("Form submitted successfully!");
+  console.log("Form Data:", formData);
+}
+
+// Drag and drop setup
+function setupDragAndDrop() {
+  const dropArea = document.getElementById('profile');
+
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
+  });
+
+  dropArea.addEventListener('drop', handleDrop, false);
+
+  function handleDrop(e) {
+    let dt = e.dataTransfer;
+    let droppedFiles = dt.files;
+    files.value = Array.from(droppedFiles);
+    handleFiles(files.value);
+  }
+}
+
+function handleFiles(files) {
+  console.log(files);
+}
+
+function processFiles() {
+  console.log('Processing files:', files.value);
+}
+
+onMounted(() => {
+  setupDragAndDrop();
+  fetchCookiesAndParams();
+});
+</script>
 <template>
   <div class="container">
     <div class="row jumbotron box8 rounded">
       <div class="col-sm-12 mx-t3 mb-5">
         <h2 class="text-center text-info">FORMKIT PRO</h2>
       </div>
-      <FormKit  type="form" @submit="onFormSubmit" :plugins="[castRangeToNumber]">
+      <FormKit  type="form" @submit="onFormSubmit">
        <div class="row col-sm-12">
         <div class="col-sm-4 form-group">
         <FormKit
@@ -67,7 +153,6 @@
               type="file"
               name="profile"
               id="profile"
-              validation="required"
               label="Choose a file"
               help="Drag and drop your file here or click to browse"
               :config="{ 
@@ -78,8 +163,8 @@
             />
             <div v-if="files.length > 0" class="uploaded-files">
               <p>Uploaded Files:</p>
-              <ul>
-                <li v-for="file in files" :key="file.name">{{ file.name }}</li>
+              <ul ref="parent">
+                <li v-for="file in files" :key="file.name" class="draggable">{{ file.name }}</li>
               </ul>
             </div>
           </div>
@@ -131,102 +216,5 @@
     </div>
 </div>
 </template>
-
-<script>
-import CustomSignature from '../common/CustomSignature/CustomSignature.vue';
-import { getCookie } from '@/utils/cookieReader';
-import { getUtmParameters } from '@/utils/urlParams'; 
-
-export default {
-  name: "FormKitFirstForm",
-  components: { CustomSignature },
-  data() {
-    return {
-      radioOptions: {
-        x: 'Option X',
-        y: 'Option Y',
-        z: 'Option Z'
-      },
-      files: [],  
-      cookies: null,
-      utmParams: null,
-      formData: {}
-    }
-  },
-  mounted() {
-    this.setupDragAndDrop();
-    this.fetchCookiesAndParams();
-  },
-  methods: {
-    fetchCookiesAndParams() {
-      this.cookies = getCookie('session_id'); 
-      this.utmParams = getUtmParameters();
-      this.formData = {
-        ...this.formData,
-        _meta: {
-          cookieData: this.cookies,
-          utmData: JSON.stringify(this.utmParams)
-        }
-      };
-    },
-    async onFormSubmit() {
-      this.$provideGlobals.setLocalStorageItem('formSubmission', true);
-      this.processFiles();
-      alert("Form submitted successfully!");
-      console.log("Form Data:", this.formData);
-    },
-    castRangeToNumber(node) {
-      if (node.props.type !== 'range') return;
-      node.hook.input((value, next) => next(Number(value)));
-    },
-    setupDragAndDrop() {
-      const dropArea = document.getElementById('profile');
-      const component = this; 
-
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
-      });
-
-      function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-
-      ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, highlight, false);
-      });
-
-      ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, unhighlight, false);
-      });
-
-      dropArea.addEventListener('drop', handleDrop, false);
-
-      function highlight() {
-        dropArea.classList.add('highlight');
-      }
-
-      function unhighlight() {
-        dropArea.classList.remove('highlight');
-      }
-
-      function handleDrop(e) {
-        let dt = e.dataTransfer;
-        let files = dt.files;
-        component.files = Array.from(files); 
-        component.handleFiles(component.files); 
-      }
-    },
-    handleFiles(files) {
-      console.log(files); // Just for demonstration
-    },
-    processFiles() {
-      console.log('Processing files:', this.files);
-    }
-  }
-}
-</script>
-
-
 
 <style scoped src="./FormKitFirstForm.css"></style>

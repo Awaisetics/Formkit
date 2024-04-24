@@ -17,3 +17,6 @@
 .highlight {
     border-color: #ffcc00;
 }
+.draggable {
+  cursor: grab;
+}

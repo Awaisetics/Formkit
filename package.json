@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@formkit/drag-and-drop": "^0.0.38",
     "@formkit/themes": "^1.6.2",
     "@formkit/vue": "^1.6.2",
     "bootstrap": "^5.3.3",
