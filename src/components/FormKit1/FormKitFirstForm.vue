@@ -161,6 +161,7 @@ onMounted(() => {
               type="file"
               name="profile"
               id="profile"
+              multiple="true"
               label="Choose a file"
               help="Drag and drop your file here or click to browse"
               :config="{ 
